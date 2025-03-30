@@ -15,7 +15,7 @@ INSERT INTO products (name, description, price, image_url, stock_quantity) VALUE
     75
 ),
 (
-    'Kenya AA',th
+    'Kenya AA',
     'Complex and winey with notes of blackberry, grapefruit, and black currant. One of our most popular single-origin coffees.',
     27.99,
     'images/products/kenya-aa.jpg',
