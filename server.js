@@ -202,14 +202,18 @@ app.delete('/products/:id', verifyToken, isAdmin, async (req, res) => {
     const { id } = req.params;
 
     try {
+        // First delete related order_items
+        await pool.query('DELETE FROM order_items WHERE product_id = $1', [id]);
+        // Then delete the product
         const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING *', [id]);
+        
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
         res.json({ message: 'Product deleted successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error deleting product:', error);
+        res.status(500).json({ message: 'Error deleting product' });
     }
 });
 
@@ -328,17 +332,60 @@ app.post('/admin/create', verifyToken, isAdmin, async (req, res) => {
     }
 });
 
+// Update user with isAdmin middleware
+app.put('/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { username, role } = req.body;
+        
+        if (!['user', 'admin'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        // Check if user exists
+        const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if new username is already taken (if username is being changed)
+        if (username !== userResult.rows[0].username) {
+            const existingUser = await pool.query('SELECT id FROM users WHERE username = $1 AND id != $2', [username, userId]);
+            if (existingUser.rows.length > 0) {
+                return res.status(400).json({ message: 'Username already taken' });
+            }
+        }
+
+        // Update user without updated_at field
+        await pool.query(
+            'UPDATE users SET username = $1, role = $2 WHERE id = $3',
+            [username, role, userId]
+        );
+        
+        res.json({ message: 'User updated successfully' });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Error updating user' });
+    }
+});
+
+// Delete user with isAdmin middleware
 app.delete('/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
     const userId = req.params.id;
     
     try {
-        const result = await pool.query('SELECT role FROM users WHERE id = $1', [userId]);
-        
-        if (result.rows[0].role === 'admin') {
-            return res.status(400).json({ message: 'Cannot delete admin users' });
+        // Check if trying to delete yourself
+        if (userId === req.user.userId.toString()) {
+            return res.status(400).json({ message: 'Cannot delete your own account' });
         }
 
-        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+        // Delete the user
+        const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [userId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
         console.error('Error deleting user:', error);
@@ -349,6 +396,25 @@ app.delete('/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
 // Token verification endpoint
 app.get('/verify-token', verifyToken, (req, res) => {
     res.json({ valid: true });
+});
+
+// Delete user
+app.delete('/users/:id', verifyToken, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const [user] = await pool.query('SELECT role FROM users WHERE id = $1', [userId]);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Allow deleting any user, including admins
+        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Error deleting user' });
+    }
 });
 
 // Start server
