@@ -162,9 +162,39 @@ async function loadProducts() {
     try {
         const response = await fetch('/products');
         products = await response.json();
+        
+        // Define default categories
+        const defaultCategories = [
+            'Hot Coffee',
+            'Iced Coffee',
+            'Tea',
+            'Pastry',
+            'Snacks',
+            'Equipment',
+            'Accessories'
+        ];
+        
+        // Get unique categories from products and combine with defaults
+        const existingCategories = [...new Set(products.map(product => product.category))];
+        const allCategories = [...new Set([...defaultCategories, ...existingCategories])]
+            .filter(category => category && category !== 'undefined')
+            .sort();
+        
+        // Populate category filter
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.innerHTML = `
+                <option value="">All Categories</option>
+                ${allCategories.map(category => `
+                    <option value="${category}">${category}</option>
+                `).join('')}
+            `;
+        }
+        
         displayProducts(products);
     } catch (error) {
         console.error('Error loading products:', error);
+        showNotification('Error loading products', 'error');
     }
 }
 
@@ -190,7 +220,7 @@ function displayProducts(productsToShow) {
         <tr>
             <td><img src="${product.image_url || 'images/placeholder.jpg'}" alt="${product.name}" class="product-image"></td>
             <td>${product.name}</td>
-            <td>${product.description || 'No category'}</td>
+            <td>${product.category || 'No category'}</td>
             <td>$${parseFloat(product.price).toFixed(2)}</td>
             <td>${product.stock_quantity || 0}</td>
             <td>
@@ -235,12 +265,14 @@ function displayUsers(usersToShow) {
 // Filter Functions
 function filterProducts() {
     const searchTerm = productSearch?.value.toLowerCase() || '';
-    const category = categoryFilter?.value || '';
+    const selectedCategory = categoryFilter?.value || '';
 
     const filtered = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
                             (product.description || '').toLowerCase().includes(searchTerm);
-        const matchesCategory = !category || product.category === category;
+        const matchesCategory = !selectedCategory || 
+                              (product.category && product.category !== 'undefined' && 
+                               product.category === selectedCategory);
         return matchesSearch && matchesCategory;
     });
 
@@ -249,11 +281,11 @@ function filterProducts() {
 
 function filterUsers() {
     const searchTerm = userSearch?.value.toLowerCase() || '';
-    const roleFilter = roleFilter?.value || '';
+    const selectedRole = roleFilter?.value || '';
 
     const filtered = users.filter(user => {
         const matchesSearch = user.username.toLowerCase().includes(searchTerm);
-        const matchesRole = !roleFilter || user.role === roleFilter;
+        const matchesRole = !selectedRole || user.role === selectedRole;
         return matchesSearch && matchesRole;
     });
 

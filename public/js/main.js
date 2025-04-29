@@ -66,7 +66,7 @@ function updateUI() {
         
         // Update auth buttons
         authButtons.innerHTML = `
-            <a href="/admin-dashboard.html" class="btn btn-primary" style="display: ${userRole === 'admin' ? 'inline-block' : 'none'}">
+            <a href="/admin-dashboard.html" class="btn btn-outline" style="display: ${userRole === 'admin' ? 'inline-block' : 'none'}">
                 <i class="fas fa-cog"></i> Admin Dashboard
             </a>
             <div class="profile-dropdown">
@@ -155,6 +155,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.target.style.display = 'none';
         }
     });
+
+    // Add event listeners for search and filters
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
+    }
+    if (priceFilter) {
+        priceFilter.addEventListener('change', filterProducts);
+    }
+    if (stockFilter) {
+        stockFilter.addEventListener('change', filterProducts);
+    }
 });
 
 // Handle Login
@@ -323,20 +334,33 @@ function displayProducts(productsToShow) {
 
     console.log('Displaying products:', productsToShow); // Debug log
     
-    productsGrid.innerHTML = productsToShow.map(product => `
-        <div class="product-card">
-            <img src="${product.image_url || 'images/placeholder.jpg'}" alt="${product.name}" onerror="this.src='images/placeholder.jpg'">
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p>${product.description || 'No description available'}</p>
-                <p class="price">$${parseFloat(product.price || 0).toFixed(2)}</p>
-                <p class="stock">In Stock: ${product.stock_quantity || 0}</p>
-                <button onclick="addToCart(${product.id})" class="btn btn-primary" ${(product.stock_quantity || 0) < 1 ? 'disabled' : ''}>
-                    ${(product.stock_quantity || 0) < 1 ? 'Out of Stock' : 'Add to Cart'}
-                </button>
+    productsGrid.innerHTML = productsToShow.map(product => {
+        // Create image element with error handling
+        const img = document.createElement('img');
+        img.src = product.image_url || 'images/placeholder.jpg';
+        img.alt = product.name;
+        img.onerror = function() {
+            this.src = 'images/placeholder.jpg';
+            this.onerror = null; // Prevent infinite loop
+        };
+        
+        return `
+            <div class="product-card">
+                <div class="product-image">
+                    ${img.outerHTML}
+                </div>
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p>${product.description || 'No description available'}</p>
+                    <p class="price">$${parseFloat(product.price || 0).toFixed(2)}</p>
+                    <p class="stock">In Stock: ${product.stock_quantity || 0}</p>
+                    <button onclick="addToCart(${product.id})" class="btn btn-primary" ${(product.stock_quantity || 0) < 1 ? 'disabled' : ''}>
+                        ${(product.stock_quantity || 0) < 1 ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Cart functionality
