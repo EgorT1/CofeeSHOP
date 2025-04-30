@@ -345,20 +345,20 @@ function displayProducts(productsToShow) {
         };
         
         return `
-            <div class="product-card">
+        <div class="product-card">
                 <div class="product-image">
                     ${img.outerHTML}
                 </div>
-                <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p>${product.description || 'No description available'}</p>
-                    <p class="price">$${parseFloat(product.price || 0).toFixed(2)}</p>
-                    <p class="stock">In Stock: ${product.stock_quantity || 0}</p>
-                    <button onclick="addToCart(${product.id})" class="btn btn-primary" ${(product.stock_quantity || 0) < 1 ? 'disabled' : ''}>
-                        ${(product.stock_quantity || 0) < 1 ? 'Out of Stock' : 'Add to Cart'}
-                    </button>
-                </div>
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p>${product.description || 'No description available'}</p>
+                <p class="price">$${parseFloat(product.price || 0).toFixed(2)}</p>
+                <p class="stock">In Stock: ${product.stock_quantity || 0}</p>
+                <button onclick="addToCart(${product.id})" class="btn btn-primary" ${(product.stock_quantity || 0) < 1 ? 'disabled' : ''}>
+                    ${(product.stock_quantity || 0) < 1 ? 'Out of Stock' : 'Add to Cart'}
+                </button>
             </div>
+        </div>
         `;
     }).join('');
 }
@@ -509,5 +509,55 @@ checkoutBtn.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error:', error);
         showNotification('An error occurred while placing the order', 'error');
+    }
+});
+
+// Form switching functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    const showLoginLink = document.getElementById('showLogin');
+    const loginTabBtns = document.querySelectorAll('#loginModal .tab-btn');
+    const registerTabBtns = document.querySelectorAll('#registerModal .tab-btn');
+
+    // Handle tab switching in login modal
+    loginTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.tab === 'new') {
+                loginModal.style.display = 'none';
+                registerModal.style.display = 'block';
+                // Set the correct active tab in register modal
+                registerTabBtns.forEach(regBtn => {
+                    regBtn.classList[regBtn.dataset.tab === 'new' ? 'add' : 'remove']('active');
+                });
+            }
+        });
+    });
+
+    // Handle tab switching in register modal
+    registerTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.tab === 'existing') {
+                registerModal.style.display = 'none';
+                loginModal.style.display = 'block';
+                // Set the correct active tab in login modal
+                loginTabBtns.forEach(loginBtn => {
+                    loginBtn.classList[loginBtn.dataset.tab === 'existing' ? 'add' : 'remove']('active');
+                });
+            }
+        });
+    });
+
+    // Handle "Already have an account?" link
+    if (showLoginLink) {
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'block';
+            // Set the correct active tab
+            loginTabBtns.forEach(btn => {
+                btn.classList[btn.dataset.tab === 'existing' ? 'add' : 'remove']('active');
+            });
+        });
     }
 });

@@ -114,38 +114,60 @@
 
     <!-- Modal for Product -->
     <div id="productModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content admin-form">
             <span class="close">&times;</span>
-            <h2 id="productModalTitle">Add New Product</h2>
+            <h2 id="productModalTitle">Edit Product</h2>
             <form id="productForm">
-                <input type="text" name="name" placeholder="Product Name" required>
-                <select name="category" required>
-                    <option value="" disabled selected>Select Category</option>
-                    <option value="Hot Coffee">Hot Coffee</option>
-                    <option value="Iced Coffee">Iced Coffee</option>
-                    <option value="Tea">Tea</option>
-                    <option value="Pastry">Pastry</option>
-                    <option value="Snacks">Snacks</option>
-                    <option value="Equipment">Equipment</option>
-                    <option value="Accessories">Accessories</option>
-                </select>
-                <textarea name="description" placeholder="Product Description" required></textarea>
-                <input type="number" name="price" placeholder="Price" step="0.01" min="0" required>
-                <input type="number" name="stock" placeholder="Stock Quantity" min="0" required>
-                <input type="url" name="image_url" placeholder="Image URL">
-                <button type="submit" class="btn btn-primary">Save Product</button>
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" class="form-control" id="productName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Category</label>
+                    <select class="form-control" id="productCategory" name="category" required>
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="Hot Coffee">Hot Coffee</option>
+                        <option value="Iced Coffee">Iced Coffee</option>
+                        <option value="Tea">Tea</option>
+                        <option value="Pastry">Pastry</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Accessories">Accessories</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea class="form-control" id="productDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price</label>
+                    <input type="number" class="form-control" id="productPrice" name="price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Stock Quantity</label>
+                    <input type="number" class="form-control" id="productStock" name="stock" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="productImage">Image URL</label>
+                    <input type="url" class="form-control" id="productImage" name="image_url">
+                </div>
+                <button type="submit" class="btn btn-color">Save Product</button>
             </form>
         </div>
     </div>
 
     <!-- Modal for Admin -->
     <div id="adminModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content admin-form">
             <span class="close">&times;</span>
             <h2>Add New Admin</h2>
             <form id="adminForm">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Create Admin</button>
             </form>
         </div>
@@ -153,18 +175,18 @@
 
     <!-- Edit User Modal -->
     <div id="editUserModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content admin-form">
             <span class="close">&times;</span>
             <h2>Edit User</h2>
             <form id="editUserForm">
                 <input type="hidden" id="editUserId">
                 <div class="form-group">
                     <label for="editUsername">Username</label>
-                    <input type="text" id="editUsername" required>
+                    <input type="text" class="form-control" id="editUsername" required>
                 </div>
                 <div class="form-group">
                     <label for="editRole">Role</label>
-                    <select id="editRole" required>
+                    <select class="form-control" id="editRole" required>
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
